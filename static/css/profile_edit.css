@@ -111,7 +111,20 @@
     object-fit: cover;
     display: block;
 }
+.avatar-upload {
+    font-size: 0;
+}
 
+.avatar-upload a, 
+.avatar-upload br,
+.avatar-upload label[for="avatar-clear_id"],
+#avatar-clear_id {
+    display: none !important;
+}
+
+#id_avatar {
+    display: none;
+}
 .avatar-preview .overlay {
     position: absolute;
     inset: 0;
