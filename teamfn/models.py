@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 
+from core.constants import (MAX_LENGTH_STANDARD,
+                            MAX_LENGTH_STATUS)
+
 
 user_model = get_user_model()
 
@@ -12,7 +15,7 @@ class Project(models.Model):
         CLOSE = 'closed', 'Закрыт'
 
     name = models.CharField(
-        max_length=200,
+        max_length=MAX_LENGTH_STANDARD,
         verbose_name='Название проекта'
     )
     description = models.TextField(
@@ -37,7 +40,7 @@ class Project(models.Model):
     )
     status = models.CharField(
         choices=ProjectStatus.choices,
-        max_length=6,
+        max_length=MAX_LENGTH_STATUS,
         default=ProjectStatus.OPEN,
         verbose_name='Статус проекта'
     )

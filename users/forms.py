@@ -1,16 +1,19 @@
-from django import forms
-from django.contrib.auth import get_user_model, authenticate
 import re
 
+from django import forms
+from django.contrib.auth import authenticate, get_user_model
 
-user_model = get_user_model()
+from core.mixins import GithubValidationMixin
+
+
+User = get_user_model()
 
 
 class RegisterForm(forms.ModelForm):
     password = forms.CharField(label='Пароль', widget=forms.PasswordInput)
 
     class Meta:
-        model = user_model
+        model = User
         fields = ('name', 'surname', 'email', 'password')
 
     def save(self, commit=True):
@@ -23,7 +26,7 @@ class RegisterForm(forms.ModelForm):
 
 class LoginForm(forms.Form):
     email = forms.EmailField(label='Электронная почта')
-    password = forms.CharField(label='Пароль')
+    password = forms.CharField(label='Пароль', widget=forms.PasswordInput)
 
     def clean(self):
         cleaned_data = super().clean()
@@ -37,10 +40,12 @@ class LoginForm(forms.Form):
         return cleaned_data
 
 
-class ProfileEditForm(forms.ModelForm):
+class ProfileEditForm(GithubValidationMixin, forms.ModelForm):
     class Meta:
-        model = user_model
+        model = User
         fields = ('name', 'surname', 'avatar', 'about', 'phone', 'github_url')
+        widgets = {'avatar': forms.FileInput(attrs={
+            'class': 'hidden-avatar-input', 'id': 'id_avatar'})}
 
     def clean_phone(self):
         phone = self.cleaned_data.get('phone')
@@ -59,13 +64,6 @@ class ProfileEditForm(forms.ModelForm):
                 'Пользователь с таким номером уже существует'
             )
         return phone
-
-    def clean_github_url(self):
-        url = self.cleaned_data.get('github_url')
-        if url:
-            if 'github.com' not in url.lower():
-                raise forms.ValidationError('Ссылка должна вести на github')
-        return url
 
 
 class PasswordChangeForm(forms.Form):

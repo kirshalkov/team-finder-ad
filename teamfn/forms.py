@@ -1,9 +1,10 @@
-from .models import Project
 from django import forms
 
+from core.mixins import GithubValidationMixin
+from teamfn.models import Project
 
-class ProjectForm(forms.ModelForm):
 
+class ProjectForm(GithubValidationMixin, forms.ModelForm):
     class Meta:
         model = Project
         fields = ('name', 'description', 'github_url', 'status')
@@ -25,9 +26,3 @@ class ProjectForm(forms.ModelForm):
                 'class': 'form-select'
             }),
         }
-
-    def clean_github_url(self):
-        url = self.cleaned_data.get('github_url')
-        if url and 'github.com' not in url.lower():
-            raise forms.ValidationError('Ссылка должна вести на github')
-        return url

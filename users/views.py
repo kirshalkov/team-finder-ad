@@ -1,23 +1,31 @@
-from django.views import generic
 from django.contrib.auth import (
     get_user_model,
     login,
-    update_session_auth_hash,
     logout,
+    update_session_auth_hash,
 )
-from .forms import RegisterForm, LoginForm, ProfileEditForm, PasswordChangeForm
-from django.urls import reverse_lazy, reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
+from django.urls import reverse, reverse_lazy
+from django.views import generic
+
+from core.constants import PAGINATION_VALUE
+from users.forms import (
+    LoginForm,
+    PasswordChangeForm,
+    ProfileEditForm,
+    RegisterForm,
+)
 
 
-User = get_user_model()  # noqa: N806
+User = get_user_model()
 
 
 class UserList(generic.ListView):
     model = User
     template_name = 'users/participants.html'
     context_object_name = 'participants'
+    paginate_by = PAGINATION_VALUE
 
     def get_queryset(self):
         queryset = User.objects.all().order_by('pk')

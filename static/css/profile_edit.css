@@ -115,6 +115,21 @@
     font-size: 0;
 }
 
+.avatar-upload .clearable-file-input {
+    display: none;
+}
+
+
+#id_avatar {
+    display: none;
+}
+
+
+.avatar-upload label[for="id_avatar-clear"],
+.avatar-upload .clearable-file-input span,
+.avatar-upload .clearable-file-input a {
+    display: none;
+}
 .avatar-upload a, 
 .avatar-upload br,
 .avatar-upload label[for="avatar-clear_id"],

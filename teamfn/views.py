@@ -1,24 +1,35 @@
-from django.views import generic
-from .models import Project, Skill
+import json
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import (
-    JsonResponse,
-    HttpResponseForbidden,
     HttpResponseBadRequest,
+    HttpResponseForbidden,
+    JsonResponse,
 )
 from django.shortcuts import get_object_or_404
-from .forms import ProjectForm
 from django.urls import reverse
-import json
+from django.views import generic
+
+from core.constants import (
+    AUTOCOMPLETE_LIMIT,
+    PAGINATION_VALUE,
+    STATUS_CLOSED,
+    STATUS_OPEN,)
+
+from teamfn.forms import ProjectForm
+from teamfn.models import Project, Skill
 
 
 class ProjectList(generic.ListView):
     model = Project
     template_name = 'projects/project_list.html'
     context_object_name = 'projects'
+    paginate_by = PAGINATION_VALUE
 
     def get_queryset(self):
-        queryset = Project.objects.all().order_by('-created_at')
+        queryset = Project.objects.select_related(
+            'owner').prefetch_related(
+                'skills').order_by('-created_at')
         skill_name = self.request.GET.get('skill')
         if skill_name:
             queryset = queryset.filter(skills__name=skill_name).distinct()
@@ -35,17 +46,21 @@ class ProjectDetail(generic.DetailView):
     model = Project
     template_name = 'projects/project-details.html'
     pk_url_kwarg = 'project_id'
-    context_object_name = 'project'
+
+    def get_queryset(self):
+        return Project.objects.select_related(
+            'owner').prefetch_related('skills')
 
 
 class ProjectCompleteView(LoginRequiredMixin, generic.View):
 
     def post(self, request, project_id):
         project = get_object_or_404(Project, pk=project_id)
-        if project.owner == request.user and project.status == 'open':
-            project.status = 'closed'
+        if project.owner == request.user and project.status == STATUS_OPEN:
+            project.status = STATUS_CLOSED
             project.save()
-            return JsonResponse({"status": "ok", "project_status": "closed"})
+            return JsonResponse({"status": "ok",
+                                 "project_status": STATUS_CLOSED})
         return HttpResponseForbidden()
 
 
@@ -54,13 +69,14 @@ class ProjectToggleParticipateView(LoginRequiredMixin, generic.View):
     def post(self, request, project_id):
         project = get_object_or_404(Project, pk=project_id)
         user = request.user
-        if project.participants.filter(pk=user.pk).exists():
+
+        if is_participant := project.participants.filter(pk=user.pk).exists():
             project.participants.remove(user)
-            participants = False
         else:
             project.participants.add(user)
-            participants = True
-        return JsonResponse({"status": "ok", "participant": participants})
+
+        return JsonResponse({"status": "ok",
+                             "participant": not is_participant})
 
 
 class SkillAutocompleteView(generic.View):
@@ -71,7 +87,7 @@ class SkillAutocompleteView(generic.View):
             return JsonResponse([], safe=False)
         skills = Skill.objects.filter(
             name__istartswith=query
-        ).order_by('name')[:10]
+        ).order_by('name')[:AUTOCOMPLETE_LIMIT]
         data = list(skills.values('id', 'name'))
         return JsonResponse(data, safe=False)
 
@@ -99,7 +115,7 @@ class SkillAddView(LoginRequiredMixin, generic.View):
         elif name:
             skill, created = Skill.objects.get_or_create(name=name)
         if skill:
-            if skill not in project.skills.all():
+            if not project.skills.filter(pk=skill.pk).exists():
                 project.skills.add(skill)
                 added = True
         return JsonResponse({
@@ -117,7 +133,7 @@ class SkillRemoveView(LoginRequiredMixin, generic.View):
         skill = get_object_or_404(Skill, pk=skill_id)
         if project.owner != request.user:
             return HttpResponseForbidden()
-        if skill in project.skills.all():
+        if project.skills.filter(pk=skill.pk).exists():
             project.skills.remove(skill)
             return JsonResponse({"status": "ok", "id": skill.pk})
         return HttpResponseBadRequest()
