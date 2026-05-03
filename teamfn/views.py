@@ -1,10 +1,11 @@
-from django.shortcuts import render
 from django.views import generic
-from .models import Project, Skill 
+from .models import Project, Skill
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import (JsonResponse,
-                         HttpResponseForbidden,
-                         HttpResponseBadRequest)
+from django.http import (
+    JsonResponse,
+    HttpResponseForbidden,
+    HttpResponseBadRequest,
+)
 from django.shortcuts import get_object_or_404
 from .forms import ProjectForm
 from django.urls import reverse
@@ -41,7 +42,7 @@ class ProjectCompleteView(LoginRequiredMixin, generic.View):
 
     def post(self, request, project_id):
         project = get_object_or_404(Project, pk=project_id)
-        if project.owner == request.user and (project.status == 'open'):
+        if project.owner == request.user and project.status == 'open':
             project.status = 'closed'
             project.save()
             return JsonResponse({"status": "ok", "project_status": "closed"})
@@ -69,7 +70,8 @@ class SkillAutocompleteView(generic.View):
         if not query:
             return JsonResponse([], safe=False)
         skills = Skill.objects.filter(
-            name__istartswith=query).order_by('name')[:10]
+            name__istartswith=query
+        ).order_by('name')[:10]
         data = list(skills.values('id', 'name'))
         return JsonResponse(data, safe=False)
 
@@ -100,9 +102,12 @@ class SkillAddView(LoginRequiredMixin, generic.View):
             if skill not in project.skills.all():
                 project.skills.add(skill)
                 added = True
-        return JsonResponse({"id": skill.pk if skill else None,
-                             "created": created, "added": added,
-                             'name': skill.name})
+        return JsonResponse({
+            "id": skill.pk if skill else None,
+            "created": created,
+            "added": added,
+            'name': skill.name if skill else None
+        })
 
 
 class SkillRemoveView(LoginRequiredMixin, generic.View):
@@ -135,8 +140,10 @@ class ProjectCreateView(LoginRequiredMixin, generic.CreateView):
         return response
 
     def get_success_url(self):
-        return reverse('projects:project_detail',
-                       kwargs={'project_id': self.object.pk})
+        return reverse(
+            'projects:project_detail',
+            kwargs={'project_id': self.object.pk}
+        )
 
 
 class ProjectUpdateView(LoginRequiredMixin, generic.UpdateView):
@@ -151,5 +158,7 @@ class ProjectUpdateView(LoginRequiredMixin, generic.UpdateView):
         return context
 
     def get_success_url(self):
-        return reverse('projects:project_detail',
-                       kwargs={'project_id': self.object.pk})
+        return reverse(
+            'projects:project_detail',
+            kwargs={'project_id': self.object.pk}
+        )

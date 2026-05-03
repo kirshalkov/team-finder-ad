@@ -1,15 +1,17 @@
 from django.views import generic
-from django.contrib.auth import (get_user_model,
-                                 login,
-                                 update_session_auth_hash,
-                                 logout)
+from django.contrib.auth import (
+    get_user_model,
+    login,
+    update_session_auth_hash,
+    logout,
+)
 from .forms import RegisterForm, LoginForm, ProfileEditForm, PasswordChangeForm
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 
 
-User = get_user_model()
+User = get_user_model()  # noqa: N806
 
 
 class UserList(generic.ListView):
@@ -22,7 +24,7 @@ class UserList(generic.ListView):
         return queryset
 
 
-class UserDetail(generic.DeleteView):
+class UserDetail(generic.DetailView):
     model = User
     template_name = 'users/user-details.html'
     pk_url_kwarg = 'user_id'
@@ -60,8 +62,10 @@ class ProfileEditView(LoginRequiredMixin, generic.UpdateView):
         return self.request.user
 
     def get_success_url(self):
-        return reverse('users:profile',
-                       kwargs={'user_id': self.request.user.pk})
+        return reverse(
+            'users:profile',
+            kwargs={'user_id': self.request.user.pk}
+        )
 
 
 class PasswordChangeView(LoginRequiredMixin, generic.FormView):
@@ -82,8 +86,10 @@ class PasswordChangeView(LoginRequiredMixin, generic.FormView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse('users:profile',
-                       kwargs={'user_id': self.request.user.pk})
+        return reverse(
+            'users:profile',
+            kwargs={'user_id': self.request.user.pk}
+        )
 
 
 class MyLogoutView(generic.View):

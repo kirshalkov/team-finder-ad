@@ -1,16 +1,16 @@
-from django import forms 
+from django import forms
 from django.contrib.auth import get_user_model, authenticate
 import re
 
 
-User = get_user_model()
+user_model = get_user_model()
 
 
 class RegisterForm(forms.ModelForm):
     password = forms.CharField(label='Пароль', widget=forms.PasswordInput)
 
     class Meta:
-        model = User
+        model = user_model
         fields = ('name', 'surname', 'email', 'password')
 
     def save(self, commit=True):
@@ -31,7 +31,7 @@ class LoginForm(forms.Form):
         password = cleaned_data.get('password')
         if email and password:
             user = authenticate(username=email, password=password)
-            if user == None:
+            if user is None:
                 raise forms.ValidationError('Неправильная почта или пароль!')
             self.user_cache = user
         return cleaned_data
@@ -39,7 +39,7 @@ class LoginForm(forms.Form):
 
 class ProfileEditForm(forms.ModelForm):
     class Meta:
-        model = User
+        model = user_model
         fields = ('name', 'surname', 'avatar', 'about', 'phone', 'github_url')
 
     def clean_phone(self):
@@ -50,11 +50,14 @@ class ProfileEditForm(forms.ModelForm):
             phone = '+7' + phone[1:]
         if not re.fullmatch(r'\+7\d{10}', phone):
             raise forms.ValidationError(
-                'Номер должен быть в формате +7XXXXXXXXXX или 8XXXXXXXXXX')
+                'Номер должен быть в формате +7XXXXXXXXXX или 8XXXXXXXXXX'
+            )
         if User.objects.filter(phone=phone).exclude(
-            pk=self.instance.pk).exists():
+            pk=self.instance.pk
+        ).exists():
             raise forms.ValidationError(
-                'Пользователь с таким номером уже существует')
+                'Пользователь с таким номером уже существует'
+            )
         return phone
 
     def clean_github_url(self):
@@ -66,12 +69,18 @@ class ProfileEditForm(forms.ModelForm):
 
 
 class PasswordChangeForm(forms.Form):
-    old_password = forms.CharField(label='Старый пароль',
-                                   widget=forms.PasswordInput)
-    new_password1 = forms.CharField(label='Новый пароль',
-                                    widget=forms.PasswordInput)
-    new_password2 = forms.CharField(label='Подтвердите нвоый пароль',
-                                    widget=forms.PasswordInput)
+    old_password = forms.CharField(
+        label='Старый пароль',
+        widget=forms.PasswordInput
+    )
+    new_password1 = forms.CharField(
+        label='Новый пароль',
+        widget=forms.PasswordInput
+    )
+    new_password2 = forms.CharField(
+        label='Подтвердите новый пароль',
+        widget=forms.PasswordInput
+    )
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)

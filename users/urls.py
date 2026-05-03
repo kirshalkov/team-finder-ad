@@ -14,5 +14,5 @@ urlpatterns = [
          name='profile_edit'),
     path('change-password/', views.PasswordChangeView.as_view(),
          name='password_change'),
-    path('logout/', views.MyLogoutView.as_view(), name='logout')
+    path('logout/', views.MyLogoutView.as_view(), name='logout'),
 ]

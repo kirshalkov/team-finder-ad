@@ -14,7 +14,8 @@ urlpatterns = [
     path('<int:project_id>/skills/add/', views.SkillAddView.as_view(),
          name='skill_add'),
     path('<int:project_id>/skills/<int:skill_id>/remove/',
-         views.SkillRemoveView.as_view(), name='skill_remove'),
+         views.SkillRemoveView.as_view(),
+         name='skill_remove'),
     path('create-project/', views.ProjectCreateView.as_view(),
          name='project_create'),
     path('<int:project_id>/edit/', views.ProjectUpdateView.as_view(),
@@ -22,5 +23,6 @@ urlpatterns = [
     path('<int:project_id>/complete/', views.ProjectCompleteView.as_view(),
          name='complete'),
     path('<int:project_id>/toggle-participate/',
-         views.ProjectToggleParticipateView.as_view(), name='participate')
-    ]
+         views.ProjectToggleParticipateView.as_view(),
+         name='participate'),
+]
