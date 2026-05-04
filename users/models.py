@@ -106,5 +106,5 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         return ContentFile(
             buffer.getvalue(),
-            name=f'avatar_{self.pk}.png'
+            name=f'avatar_{self.email.split("@")[0]}.png'
         )

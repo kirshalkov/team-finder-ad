@@ -67,7 +67,7 @@ class Project(models.Model):
 
 class Skill(models.Model):
     name = models.CharField(
-        max_length=124,
+        max_length=MAX_LENGTH_STANDARD,
         verbose_name='Навык'
     )
 

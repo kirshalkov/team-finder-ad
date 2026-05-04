@@ -65,7 +65,6 @@ cp .env_example .env
 | **POSTGRES_PASSWORD** | Пароль пользователя PostgreSQL.                                                                                                                            |
 | **POSTGRES_HOST**     | Адрес сервера БД. В случае локальной разработки localhost.                                                                                                 |
 | **POSTGRES_PORT**     | Порт подключения к БД (по умолчанию `5432`).                                                                                                               |
-| **TASK_VERSION**      | Номер варианта вашего задания. Используется для определения набора HTML-шаблонов.                                                                          |
 
 ---
 
@@ -109,6 +108,7 @@ python manage.py runserver
 
 Теперь проект доступен по адресу [http://localhost:8000](http://localhost:8000). 
 Если видите ракету с надписью "The install worked successfully! Congratulations!", то запуск прошёл успешно, Django работает!
+
 
 ## Автор
 * **Кирилл Шальков** — *Backend Developer* — [GitHub](https://github.com/kirshalkov)
